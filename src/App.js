@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SingleColor from "./SingleColor";
 
 import Values from "values.js";
@@ -7,6 +7,7 @@ function App() {
   const [color, setColor] = useState("");
   const [error, setError] = useState(false);
   const [list, setList] = useState(new Values("#f15025").all(10));
+  const [alert, setAlert] = useState(false);
   const handleSubmit = (e) => {
     e.preventDefault();
     try {
@@ -18,10 +19,21 @@ function App() {
       console.log(error);
     }
   };
+  const onCopy = (hexValue) => {
+      setAlert(true);
+      navigator.clipboard.writeText(hexValue);
+  }
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setAlert(false);
+    }, 3000);
+    return () => clearTimeout(timeout);
+  }, [alert]);
   return (
     <>
       <section className="container">
         <h3>color generator</h3>
+
         <form onSubmit={handleSubmit}>
           <input
             type="text"
@@ -34,6 +46,9 @@ function App() {
             Submit
           </button>
         </form>
+        <section className="container">
+          {alert && <p className="alert">Copied to clipboard</p>}
+        </section>
       </section>
       <section className="colors">
         {list.map((color, index) => {
@@ -43,7 +58,8 @@ function App() {
               {...color}
               index={index}
               hexColor={color.hex}
-            ></SingleColor>
+              onCopy={() => onCopy(color.hex)}
+            />
           );
         })}
       </section>
