@@ -8,6 +8,8 @@ function App() {
   const [error, setError] = useState(false);
   const [list, setList] = useState(new Values("#f15025").all(10));
   const [alert, setAlert] = useState(false);
+  const [copyColor, setCopyColer] = useState("");
+  const [timer, setTimer] = useState(null);
   const handleSubmit = (e) => {
     e.preventDefault();
     try {
@@ -20,13 +22,26 @@ function App() {
     }
   };
   const onCopy = (hexValue) => {
-      setAlert(true);
+      setAlert(hexValue);
+      setCopyColer(hexValue);
       navigator.clipboard.writeText(hexValue);
   }
   useEffect(() => {
+    // prevent initial render setting timeout
+    if (!alert) return;
+
+    // set timeout
     const timeout = setTimeout(() => {
-      setAlert(false);
+        setAlert(false);
+        setTimer(null);
     }, 3000);
+
+    // keep timeout reference and cancel previous
+    setTimer((prevValue) => {
+      if (!isNaN(prevValue)) clearTimeout(prevValue);
+      return timeout;
+    });
+
     return () => clearTimeout(timeout);
   }, [alert]);
   return (
@@ -47,7 +62,7 @@ function App() {
           </button>
         </form>
         <section className="container">
-          {alert && <p className="alert">Copied to clipboard</p>}
+          {alert && <p className="alert">#{copyColor} Copied to clipboard</p>}
         </section>
       </section>
       <section className="colors">
